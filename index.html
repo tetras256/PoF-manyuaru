@@ -1,121 +1,443 @@
-<!DOCTYPE html>
+z<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>固定フレームサイト</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <title>ページめくり</title>
   <style>
-    html, body {
+    body {
       margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow: hidden;
-       font-family: 'Kiwi Maru', serif;
-      font-size: 20px;
-    }
-
-    .fixed-frame {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: url('pic.png') no-repeat center center;
+      padding-bottom: 100px;
+      background: url('BGDis.png') no-repeat center center fixed;
       background-size: cover;
-      z-index: -1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: serif;
+      position: relative;
+      overflow: hidden;
     }
 
-    .scroll-container {
+    .bg-overlay-image {
+      position: absolute;
+      top: 18%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 0;
+      width: 19vw;
+      height: auto;
+      pointer-events: none;
+    }
+
+    .book {
       position: relative;
+      width: 600px;
+      height: 600px;
+      perspective: 2000px;
+      z-index: 1;
+      margin-top: 30vh;
+      margin-left: 520px;
+    }
+
+    .page {
+      position: absolute;
       width: 100%;
       height: 100%;
-      overflow-y: auto;
-      padding: 60px 20px;
-      box-sizing: border-box;
+      transform-style: preserve-3d;
+      transform-origin: left center;
+      transition: transform 1s ease;
     }
 
-    .content-box {
-      background-color: rgba(255, 255, 255, 0.93);
-      border-radius: 20px;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 40px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    .page .front,
+    .page .back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: #fffef5;
+      border: 1px solid #999;
+      box-sizing: border-box;
+      padding: 40px 30px;
+      backface-visibility: hidden;
+    }
+
+    .page .back {
+      transform: rotateY(180deg);
+    }
+
+    .page.flipped {
+      transform: rotateY(-180deg);
+    }
+
+    /* ★濃い茶色の革表紙（透けない） */
+    .page.cover .front,
+    .page.cover .back {
+      background: linear-gradient(135deg, #4b2c18 0%, #6b3a1f 100%);
+      color: #f5e6d3;
+      font-weight: bold;
+      border: 2px solid #3b2414;
+      box-shadow:
+        inset 0 0 40px rgba(0,0,0,0.5),
+        0 10px 25px rgba(0,0,0,0.8);
+    }
+
+    /* 表紙タイトル */
+    .page.cover .front h1 {
+      text-align: center;
+      margin-top: 220px;
+      font-size: 30px;
+      color: #e6c48c;
+      text-shadow:
+        1px 1px 3px #000,
+        -1px -1px 3px #000;
+    }
+
+    .controls {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+    }
+
+    button {
+      margin: 0 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #5e503f;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
     }
 
     h1 {
-      font-size: 3rem;
-      color: #222;
-      margin-bottom: 30px;
+      margin-top: 0;
+      font-size: 24px;
     }
 
     p {
-      font-size: 20px;
-      color: #444;
-      line-height: 1.9;
-      margin-bottom: 25px;
+      line-height: 1.5;
+      font-size: 16px;
     }
 
-    a {
-      color: #0066cc;
-      text-decoration: underline;
-      word-break: break-all;
+    .click-area {
+      position: fixed;
+      top: 0;
+      height: 100vh;
+      width: 50vw;
+      z-index: 0;
+      pointer-events: none;
     }
+
+    .click-area.left { left: 0; }
+    .click-area.right { right: 0; }
   </style>
 </head>
 <body>
 
-  <div class="fixed-frame"></div>
+  <!-- ユーミの画像 -->
+  <img class="bg-overlay-image" src="yuumi3d.png" alt="Yuumi Image" />
 
-  <div class="scroll-container">
-    <div class="content-box">
-      <h1>LoLURL</h1>
+  <!-- 左右クリックエリア -->
+  <div class="click-area full" onclick="handleClick(event)"></div>
 
-      <p>反省シート<br>
-        <a href="https://docs.google.com/spreadsheets/d/1Ns-c8w41K3F0sbZLTKXNh5tEVhz5d1MAuRmFOwfjts4/edit?usp=sharing" target="_blank">
-          https://docs.google.com/spreadsheets/d/1Ns-c8w41K3F0sbZLTKXNh5tEVhz5d1MAuRmFOwfjts4/edit?usp=sharing
-        </a>
-      </p>
+  <!-- 本 -->
+  <div class="book">
+    <!-- 表表紙 -->
+    <div class="page cover" id="page0">
+      <div class="front">
+        <h1>サーバーマニュアル</h1>
+      </div>
+      <div class="back">
+        <p style="margin-top: 250px; text-align:center;">〜 ようこそ 〜</p>
+      </div>
+    </div>
 
-      <p>スケジュール<br>
-        <a href="https://docs.google.com/spreadsheets/d/1xKvGWCBtFioPwZfoS8PhAjTaRQIndXV9aFBSV38t-Ig/edit?usp=sharing" target="_blank">
-          https://docs.google.com/spreadsheets/d/1xKvGWCBtFioPwZfoS8PhAjTaRQIndXV9aFBSV38t-Ig/edit?usp=sharing
-        </a>
-      </p>
+    <!-- 中ページ -->
+    <div class="page" id="page1">
+      <div class="front">
+        <h1>📘 サーバーマニュアル</h1>
+        <p>PoFでの活動のために事前にやっておいてもらうべきこと<br><br>
 
-      <p>Google Drive<br>
-        <a href="https://drive.google.com/drive/folders/1Y0Xxf0jdPFchMq0IeN7ALgI7PUHvEBaL?usp=drive_link" target="_blank">
-          https://drive.google.com/drive/folders/1Y0Xxf0jdPFchMq0IeN7ALgI7PUHvEBaL?usp=drive_link
-        </a>
-      </p>
 
-      <p>スクリム用BPツール<br>
-        <a href="https://draftlol.dawe.gg/" target="_blank">https://draftlol.dawe.gg/</a>
-      </p>
+          総合案内＆規約　コーチング10カ条を読む<br>
 
-      <p>練習用BPツール<br>
-        <a href="https://pick-ban-gg.web.app/" target="_blank">https://pick-ban-gg.web.app/</a>
-      </p>
+          自分の名前をxa-name-ybに変更　xaはPoF参加時のレート　nameは自分の名前　ybは現在のレート <br>
 
-      <p>リフトキット<br>
-        <a href="https://beta.riftkit.net/?room=cc80d5" target="_blank">https://beta.riftkit.net/?room=cc80d5</a>
-      </p>
+          informationカテゴリの各種urlからスケジュールを入力　＊自分の名前がない場合はご連絡ください<br>
 
-      <p>Leaguepedia LJL2025<br>
-        <a href="https://lol.fandom.com/wiki/LJL/2025_Season" target="_blank">https://lol.fandom.com/wiki/LJL/2025_Season</a>
-      </p>
+          Visual Studio Cordとliveshareのインストール　＊練習日程のhtml編集で詳細を記載<br>
 
-      <p>プロBP統計<br>
-        <a href="https://gol.gg/esports/home/" target="_blank">https://gol.gg/esports/home/</a>
-      </p>
+          chat GPTのインストール　＊すでに使用しているものがあれば不要<br>
 
-      <p>Handsサイト<br>
-        <a href="https://tetras256.github.io/HNSwebsite/" target="_blank">https://tetras256.github.io/HNSwebsite/</a>
-      </p>
+          一週間の目標設定　＊練習の日程で詳細を記載<br>
+
+          練習募集にて練習時間以外に人を募集 ＊任意<br>
+
+
+          informationカテゴリの提出物一覧フォーラムのOPGGスレッドにて自分のサブ垢を含めたマルチサーチをはる<br>
+
+          提出物一覧フォーラムのアイコン提出で自身のアイコンを提出</p>
+      </div>
+
+
+
+
+      <div class="back">
+        <h1>①活動内容</h1>
+        会議　1週間の目標設定<br>
+       ⇒前回の会議の議事録を確認し、定めた進捗が達成されたかを確認する。<br>
+       前回の会議以降〜今回の会議までに出た議題について討論し、結論を出す。<br>
+       会議の最後に、次回の会議の質を高めるための改善案を出す。</p>
+      </div>
+    </div>
+
+    <div class="page" id="page2">
+      <div class="front">
+        <h1>②HTML編集</h1>
+
+       何のため<br>
+       ・lolをやり続けるだけでチャレンジャーになれるなら今すでになっている。そうではない人間なので、0~1を作り出し、作り出したものを更によりよいものへと変化させていく成長の過程を覚えるため<br>
+       ・LOLをやり続けるだけは成功しないので正しい努力の仕方を覚えてLOLの連絡に活かす為<br>
+       ・チームが成長するための資料制作<br>
+
+       やること<br>
+       ・handswebサイトの制作、改良</p>
+
+       やり方
+        ・<a href="https://discord.com/channels/1371530284515725412/1384940153537036345" target="_blank" style="text-decoration: none; color: inherit;">
+           Discord内に作り方が記載してあります
+         </a><br>
+
+       ・分からないことはAIに聞く
+       ・その他のことはメンバーに
+        </p>
+      </div>
+    
+
+
+      <div class="back">
+        <h1>➂フィジカルテスト</h1>
+
+  <a href="https://youtu.be/4R3FLVt55GI" target="_blank">【TOPフィジカル】</a>　
+  <a href="https://youtu.be/tV-i9kzTdLU" target="_blank">【MIDフィジカル】</a>　
+  <a href="BOTのurl貼ってね" target="_blank">【BOTフィジカル】</a>
+  <br>
+       何のため<br>
+       ・正確なキルラインを学ぶため<br>
+       ・プレイヤースキル(操作精度)を上げるため<br>
+       ・正しいマッチアップ通りのレーン戦やファイトが行えるようにするため<br>
+       ・マッチアップを学ぶため<br>
+       ・戦い方の基礎を固める<br>
+
+       やること<br>
+       ・1v1,2v2をプラクティスでやる<br>
+
+       やり方<br>
+       ・プラクティスツールでリセットを活用し、レーンごと1v1や2v2を行う<br>
+       ・キルを積極的に狙ったプレイをする<br>
+       ・マッチアップで同じ行動をする(間違った行動が起きたら即リセット)</div>div>p>
+      </div>
+    </div>
+
+    <div class="page" id="page3">
+      <div class="front">
+        <h1>④フレックステスト</h1>
+        <p>
+
+          何のため<br>
+
+          ・フィジカルテストの成果発表<br>
+
+          ・試合の中でできるかどうかの確認<br>
+
+          ・B/P練習も含まれる<br>
+
+          <a href="../ban pick/banpickサイト.html">BAN PICKのやり方</a>><br>
+
+          ・最序盤(序盤8分)でどんな試合展開をするのかを学ぶ<br>
+
+
+          やること<br>
+　　　　　・戦闘をしにいく
+　　　　　・ソロキルを狙う
+          やり方<br>
+
+          ・フレックスランクを5人で行う</p>
+      </div>
+
+      
+      <div class="back">
+        <h1>⑤メタ練習</h1>
+        <p>何のために<br>
+  
+          ・lolの基礎を覚えるため（ウェーブコントロール、主導権の使い方、レーン戦のやり方、ゲームの進め方）<br>
+  
+          ・遂行能力を高めるため<br>
+  
+          ・歯車として動くということを身に着けるため<br><br>
+
+  
+          やること<br>
+  
+          ・各種動画に準じた手順を正確に行えるように練習する<br><br>
+
+  
+          やり方<br>
+  
+          ・プラクティスツールのリセット機能を活用して各種動画の通りに行う<br>
+          <a href="メタ練習.html" target="_blank">・このリンクから詳しいやり方を学ぶ</a>
+
+        </p>
+      </div>
+    </div>
+
+ <div class="page" id="page4">
+      <div class="front">
+         <h1>⑥巻き戻しカスタム</h1>
+        何故やるのか<br>
+・これまでで練習した内容を本番想定で実行できるようにするため<br>
+・効率よくやるため<br>
+
+やること<br>
+・リセットを活用して、何度もミスをしなくなるまで繰り返す。<br>
+
+やり方<br>
+・プラクティスツールで10人で集まり、ミスをしたらその時点でリセットして試合を再開する</p>
+      </div>
+      <div class="back">
+        </p>
+      </div>
+    </div>
+    
+    <!-- 裏表紙 -->
+    <div class="page cover" id="page5">
+      <div class="front"></div>
+      <div class="back"></div>
     </div>
   </div>
 
+  <!-- 操作ボタン -->
+  <div class="controls">
+    <button onclick="prevPage()">← 前</button>
+    <button onclick="nextPage()">次 →</button>
+  </div>
+
+  <script>
+    const pages = document.querySelectorAll('.page');
+    let currentPage = 0;
+
+    // 初期z-index設定
+    pages.forEach((page, index) => {
+      page.style.zIndex = pages.length - index;
+    });
+
+    function nextPage() {
+      if (currentPage < pages.length) {
+        const page = pages[currentPage];
+        page.classList.add('flipped');
+
+        const onTransitionEnd = () => {
+          page.style.zIndex = 0;
+          page.removeEventListener('transitionend', onTransitionEnd);
+        };
+        page.addEventListener('transitionend', onTransitionEnd);
+
+        currentPage++;
+      }
+    }
+
+    function prevPage() {
+      if (currentPage > 0) {
+        currentPage--;
+        const page = pages[currentPage];
+        page.classList.remove('flipped');
+        page.style.zIndex = pages.length - currentPage;
+      }
+    }
+
+    function handleClick(event) {
+  const clickX = event.clientX;
+  const screenWidth = window.innerWidth;
+
+  if (clickX < screenWidth / 2) {
+    prevPage();
+  } else {
+    nextPage();
+  }
+}
+
+  </script>
 </body>
 </html>
 
+<!-- 
 
+
+練習の日程
+
+①活動内容
+会議　1週間の目標設定
+⇒前回の会議の議事録を確認し、定めた進捗が達成されたかを確認する。
+前回の会議以降〜今回の会議までに出た議題について討論し、結論を出す。
+会議の最後に、次回の会議の質を高めるための改善案を出す。
+
+
+②HTML編集
+何のため
+・lolをやり続けるだけでチャレンジャーになれるなら今すでになっている。そうではない人間なので、0~1を作り出し、作り出したものを更によりよいものへと変化させていく成長の過程を覚えるため
+・LOLをやり続けるだけは成功しないので正しい努力の仕方を覚えてLOLの連絡に活かす為
+・チームが成長するための資料制作
+
+やること
+・handswebサイトの制作、改良
+
+やり方
+・Discord内に作り方が記載してあります
+⇒【ディスコード内からこちらに移動してくださいもしくはdiscordリンク先に飛ぶように】
+リンクはこれhttps://discord.com/channels/1371530284515725412/1384940153537036345
+・分からないことはAIに聞く
+・その他のことはメンバーに
+
+➂フィジカルテスト
+⇒【動画リンクを用意する】
+何のため
+・正確なキルラインを学ぶため
+・プレイヤースキル(操作精度)を上げるため
+・正しいマッチアップ通りのレーン戦やファイトが行えるようにするため
+・マッチアップを学ぶため
+・戦い方の基礎を固める
+
+やること
+・
+
+やり方
+・プラクティスツールでリセットを活用し、レーンごと1v1や2v2を行う
+・キルを積極的に狙ったプレイをする
+・マッチアップで同じ行動をする(間違った行動が起きたら即リセット)
+
+④フレックステスト
+何のため
+・フィジカルテストの成果発表
+・試合の中でできるかどうかの確認
+・B/P練習も含まれる⇒
+<a href="banpickサイト.html">banpickサイト</a>
+
+・最序盤(序盤8分)でどんな試合展開をするのかを学ぶ
+
+やること
+やり方
+・フレックスランクを5人で行う
+
+
+
+⑥巻き戻しカスタム
+何故やるのか
+・これまでで練習した内容を本番想定で実行できるようにするため
+・効率よくやるため
+
+やること
+・リセットを活用して、何度もミスをしなくなるまで繰り返す。
+
+やり方
+・プラクティスツールで10人で集まり、ミスをしたらその時点でリセットして試合を再開する。 -->
