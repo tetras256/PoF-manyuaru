@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>DVD風BANPICK戦略</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: radial-gradient(circle at center, #001f3f 0%, #000 100%);
+      font-family: 'Segoe UI', sans-serif;
+      color: #fff;
+      overflow: hidden;
+      position: relative;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      text-align: center;
+      padding: 20px 0;
+      z-index: 100;
+      font-size: 24px;
+      color: #0af;
+      text-shadow: 0 0 10px #0af;
+    }
+
+    .ball {
+      position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #00bcd4, #006064); /* ネオンサイバー風ブルー */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+  box-shadow: 
+    0 0 15px rgba(0, 255, 255, 0.6),
+    0 0 30px rgba(0, 255, 255, 0.3),
+    inset 0 0 10px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(3px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+  z-index: 10;
+    }
+    
+
+    /* 追加：ホバー時の光エフェクト */
+    .ball:hover {
+      box-shadow: 0 0 20px 10px rgba(255, 255, 255, 0.6);
+      transform: scale(1.1);
+}
+
+    .tab-content {
+      display: none;
+      padding: 20px;
+      background-color: rgba(17, 17, 17, 0.95);
+      border-radius: 10px;
+      border: 1px solid #333;
+      max-width: 900px;
+      margin: 250px auto 20px auto;
+      box-shadow: 0 0 20px rgba(0, 170, 255, 0.1);
+      position: relative;
+      z-index: 5;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    #bubble-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .bubble {
+      position: absolute;
+      bottom: -50px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: rise 8s linear infinite;
+    }
+
+    @keyframes rise {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 0.6;
+      }
+      100% {
+        transform: translateY(-100vh) scale(0.5);
+        opacity: 0;
+      }
+    }
+  
+              <!--それぞれのページのCSS-->
+    #tab1 {
+      font-size: 30px; /* 全体の文字サイズを大きく */
+      line-height: 1.6; /* 行間も少し広げて読みやすく */
+    }
+
+    #tab1 h2 {
+      font-size: 24px; /* 見出しはさらに大きく */
+    }
+
+    #tab1 ul {
+      padding-left: 1.5em; /* リストの左余白 */
+    }
+
+    #tab1 li {
+      margin-bottom: 1em; /* 各項目の間隔を広く */
+    }
+  
+    ul li {
+    margin-bottom: 1em; /* 1行分の余白 */
+  }
+  
+  
+  
+  
+  </style>
+</head>
+<body>
+
+  <header>BANPICK戦略知識まとめ</header>
+
+  <div id="bubble-container"></div>
+
+   <!-- タブの内容 -->
+  <div id="tab1" class="tab-content" style="font-size: 1.4em;">
+  <h2>①【基礎知識：構成の前提条件】</h2>
+  <p>構成を考える上での基本的なポイント。</p>
+  <ul>
+    <li><strong>ダメージタイプの分散</strong><br>
+      - AP/ADに偏りすぎないこと（防御アイテムの選択肢を相手に絞らせない）
+    </li>
+    <li><strong>レーン主導権が最低2つあること</strong><br>
+      - 例：トップとミッド、あるいはボットとジャングルなど
+    </li>
+    <li><strong>成長曲線の分散（タイミングのズレ）</strong><br>
+      - パワースパイク（強くなるタイミング）がかぶらないようにする<br>
+      - 全員レイトキャリーなどはNG、ピークがばらけると試合展開に柔軟性が出る
+    </li>
+    <li><strong>エンゲージ（集団戦を始める能力）を持つチャンピオンの存在</strong><br>
+      → フロントライン or イニシエーターが不在だとファイトを起こせない
+    </li>
+    <li><strong>中盤以降のサイドレーン主導権（レーンプライオリティ）が1か所以上あること</strong><br>
+      - ジャングルの動きやオブジェクト制御の鍵になる
+    </li>
+  </ul>
+</div>
+  <div id="tab2" class="tab-content" style="font-size: 1.4em;">
+    <h2>②【応用知識：ドラフトと構成対応】</h2>
+    <p>ドラフト順と相手構成に合わせた対応法。</p>
+    <ul>
+      <li><strong>時間帯ごとのダメージ総量を考える</strong><br>
+       → 序盤型 vs 中盤型 vs レイトゲーム型 で分け、バランスよくする or 明確な強みで押し切る<br>
+      </li>
+      
+      <li><strong>ファーストピックの優先度</strong><br>
+       - OPチャンピオン：先手でピックしてもカウンターを受けにくい<br>
+       - フレックスピック：レーンを隠せる（例：グラガス、マオカイ、ポッピー）<br>
+       - タンク：序盤にピックすると火力バランスが崩れにくい（構成が読まれにくい）
+      </li>
+      <li><strong>ミッド先出しをする場合</strong><br>
+       - アジール・タリヤ・ビクターなど、どれかの分野が秀でているチャンピオンは先出しできる<br>
+       - ミッドを先に出すことでほかのレーンで後出しができ、有利が取りやすくなる
+      </li>
+    
+  </ul>
+  </div>
+  <div id="tab3" class="tab-content" style="font-size: 1.4em;">
+    <h2>③【ピックバン戦略の基本方針】</h2>
+    <p><strong>構成軸を決めるための考え方。</strong></p>
+    <p><strong>相手に情報を与えずに、自分たちの構成の柔軟性を最大化</strong><br></p>
+    <li>
+     フレックスチャンピオンやOPチャンピオンを先に取って、構成を見せずにベースを整える  
+    </li>
+    <p><strong>構成のピックする順番</strong><br></p>
+    <li>
+     基本的にはJG→ADC→SUP→MID→TOPの順番で行われる<br>
+    </li>
+    <li>
+     レッドサイドの場合は最初のピックでADCとSUPをセットピックすることが多い
+    </li>
+    <p><strong>構成のバン</strong><br></p>
+    <li>
+     基本的にOPチャンピオンをバンする<br>
+    </li>
+    <li> 
+     先出しする場合はカウンターをバンする
+    </li>
+  </div>
+  <div id="tab4" class="tab-content" style="font-size: 1.4em;">
+    <h2>④【構成同士の有利・不利関係】</h2>
+    <p><strong>構成の有利不利</strong></p>
+    <li>
+      オールイン＞ ポーク
+    </li>
+    <li>
+    ディスエンゲージ ＞ 集団戦・ピックアップ
+    </li>
+    <li>
+      ポーク ＞ ADCプロテクト
+    </li>
+    <li>
+      ADCプロテクト ＞ 集団戦型
+    </li>
+    <li>
+      集団戦型 ＞ キャッチ構成
+    </li>
+    <li>
+      キャッチ構成 ＞ オールイン
+    </li>
+    <p><strong>構成の説明</strong></p>
+    <li>集団戦:フロントを前に立たせて後ろからディーラーがダメージを出す基本的な構成</li>
+    <li>オールイン:全員で同時にスキルを出し切って短期戦闘で終わらせる構成</li>
+    <li>ポーク:相手と正面から戦わずに遠くから一方的に相手の体力を削って戦う構成</li>
+    <li>キャッチ:少人数の相手を捕まえて倒して戦闘を起こす構成</li>
+    <li>ピックアップ:相手の一人を確実に倒しきる構成</li>
+    <li>ディスエンゲージ:相手のエンゲージを避けて深入りさせて戦う構成</li>
+    <li>ADCプロテクト:ADCを完全に守り切る構成</li>
+  </div>
+  <div id="tab5" class="tab-content" style="font-size: 1.4em;">
+    <h2>⑤【ドラフトの流れ：実践的プロセス】</h2>
+    <p>BAN/PICKの実践的な進行例。</p>
+    <ul>
+     <li><strong>最初のBANとPICK3体で自チームの構成の基盤を決める</strong><br>
+       - 決まったら、それに合わせて残りを柔軟に対応<br>
+     </li>
+     
+     <li><strong>ピック1～2体目：フレックス or 汎用性の高いチャンピオン</strong><br>
+       - 構成が固定されず、有利な後出しにつなげやすい<br>
+     </li>
+     
+     <li><strong>中盤～後半ピック</strong><br>
+       - 敵構成の方向性に応じてカウンターを意識<br>
+       - 自分の構成の穴（主導権・エンゲージ・ダメージタイプなど）を補完
+     </li>
+    </ul>
+  </div>
+  <div id="tab6" class="tab-content" style="font-size: 1.4em;">
+    <h2>⑥【補足アドバイス】</h2>
+    <p>コミュニケーションのコツや注意点。</p>
+    <li><strong>ADCのプロテクト構成を作るなら、エンゲージ過多になりすぎないよう注意</strong><br><br>
+    </li>
+    <li><strong>集団戦構成を組むときは、エンゲージとディスエンゲージのバランスを取ると◎</strong><br><br>
+    </li>
+    <li><strong>フレックスピックの理解が深いほど有利。メタで使われるピックだけでなく、自分たちが得意な隠しピックも武器になる。 </strong><br><br>
+    </li>
+    <li><strong>レッドサイドの場合サードピックでMIDかTOPを取りピックバンになったときにカウンターをバンする方法もある</strong><br><br>
+    </li>
+  </div>
+
+  <script>
+    const tabs = [
+  { label: "① 基礎知識", tabId: "tab1" },
+  { label: "② 応用知識", tabId: "tab2" },
+  { label: "③ ピックバン戦略", tabId: "tab3" },
+  { label: "④ 有利不利構成", tabId: "tab4" },
+  { label: "⑤ ドラフトの流れ", tabId: "tab5" },
+  { label: "⑥ 補足アドバイス", tabId: "tab6" }
+];
+
+let arranged = false;
+const balls = [];
+const ballPositions = [];
+
+function isFarEnough(x, y) {
+  return ballPositions.every(pos => {
+    const dx = pos.x - x;
+    const dy = pos.y - y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    return distance >= 120;
+  });
+}
+
+tabs.forEach((item, i) => {
+  const ball = document.createElement('div');
+  ball.className = 'ball';
+  ball.textContent = item.label;
+  ball.dataset.tab = item.tabId;
+
+  let x, y;
+  let attempts = 0;
+  do {
+    x = Math.random() * (window.innerWidth - 130);
+    y = Math.random() * (window.innerHeight - 130);
+    attempts++;
+  } while (!isFarEnough(x, y) && attempts < 20);
+
+  ballPositions.push({ x, y });
+
+  const dx = (Math.random() < 0.5 ? -1 : 1) * (0.2 + Math.random() * 0.3);
+  const dy = (Math.random() < 0.5 ? -1 : 1) * (0.2 + Math.random() * 0.3);
+
+  ball.style.left = `${x}px`;
+  ball.style.top = `${y}px`;
+
+  document.body.appendChild(ball);
+  balls.push({ el: ball, x, y, dx, dy });
+
+  ball.onclick = () => {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.getElementById(item.tabId).classList.add('active');
+
+    if (!arranged) {
+      balls.forEach((b, index) => {
+        b.el.style.left = `${40 + index * 130}px`;
+        b.el.style.top = `100px`;
+      });
+      cancelAnimationFrame(animationId);
+      arranged = true;
+    }
+  };
+});
+
+function detectCollision(b1, b2) {
+  const dx = b1.x - b2.x;
+  const dy = b1.y - b2.y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  return distance < 120;
+}
+
+function resolveCollision(b1, b2) {
+  const tempDx = b1.dx;
+  const tempDy = b1.dy;
+  b1.dx = b2.dx;
+  b1.dy = b2.dy;
+  b2.dx = tempDx;
+  b2.dy = tempDy;
+
+  b1.x += b1.dx;
+  b1.y += b1.dy;
+  b2.x += b2.dx;
+  b2.y += b2.dy;
+}
+
+function moveBalls() {
+  balls.forEach(b => {
+    if (arranged) return;
+
+    b.x += b.dx;
+    b.y += b.dy;
+
+    if (b.x <= 0 || b.x + 120 >= window.innerWidth) b.dx *= -1;
+    if (b.y <= 60 || b.y + 120 >= window.innerHeight) b.dy *= -1;
+
+    b.el.style.left = `${b.x}px`;
+    b.el.style.top = `${b.y}px`;
+  });
+
+  for (let i = 0; i < balls.length; i++) {
+    for (let j = i + 1; j < balls.length; j++) {
+      if (detectCollision(balls[i], balls[j])) {
+        resolveCollision(balls[i], balls[j]);
+      }
+    }
+  }
+
+  animationId = requestAnimationFrame(moveBalls);
+}
+
+let animationId = requestAnimationFrame(moveBalls);
+
+// 🫧 泡生成（サイズ考慮して重複防止）
+const bubbleContainer = document.getElementById('bubble-container');
+const existingPositions = [];
+
+function createBubble() {
+  const size = Math.random() * 10 + 5;
+  let x;
+  let attempts = 0;
+
+  do {
+    x = Math.random() * window.innerWidth;
+    attempts++;
+  } while (
+    existingPositions.some(({ px, ps }) => Math.abs(px - x) < (ps + size)) &&
+    attempts < 10
+  );
+
+  if (attempts >= 10) {
+    existingPositions.length = 0;
+  }
+
+  existingPositions.push({ px: x, ps: size });
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.style.width = `${size}px`;
+  bubble.style.height = `${size}px`;
+  bubble.style.left = `${x}px`;
+  bubble.style.top = `${window.innerHeight}px`;
+  bubble.style.animationDuration = `${6 + Math.random() * 4}s`;
+  bubbleContainer.appendChild(bubble);
+
+  setTimeout(() => {
+    bubble.remove();
+    const index = existingPositions.findIndex(obj => obj.px === x);
+    if (index !== -1) existingPositions.splice(index, 1);
+  }, 10000);
+}
+
+setInterval(createBubble, 300);
+  </script>
+
+</body>
+</html>

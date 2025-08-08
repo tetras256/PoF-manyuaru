@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>固定フレームサイト</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+       font-family: 'Kiwi Maru', serif;
+      font-size: 20px;
+    }
+
+    .fixed-frame {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('pic.png') no-repeat center center;
+      background-size: cover;
+      z-index: -1;
+    }
+
+    .scroll-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      padding: 60px 20px;
+      box-sizing: border-box;
+    }
+
+    .content-box {
+      background-color: rgba(255, 255, 255, 0.93);
+      border-radius: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    h1 {
+      font-size: 3rem;
+      color: #222;
+      margin-bottom: 30px;
+    }
+
+    p {
+      font-size: 20px;
+      color: #444;
+      line-height: 1.9;
+      margin-bottom: 25px;
+    }
+
+    a {
+      color: #0066cc;
+      text-decoration: underline;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="fixed-frame"></div>
+
+  <div class="scroll-container">
+    <div class="content-box">
+      <h1>LoLURL</h1>
+
+      <p>反省シート<br>
+        <a href="https://docs.google.com/spreadsheets/d/1Ns-c8w41K3F0sbZLTKXNh5tEVhz5d1MAuRmFOwfjts4/edit?usp=sharing" target="_blank">
+          https://docs.google.com/spreadsheets/d/1Ns-c8w41K3F0sbZLTKXNh5tEVhz5d1MAuRmFOwfjts4/edit?usp=sharing
+        </a>
+      </p>
+
+      <p>スケジュール<br>
+        <a href="https://docs.google.com/spreadsheets/d/1xKvGWCBtFioPwZfoS8PhAjTaRQIndXV9aFBSV38t-Ig/edit?usp=sharing" target="_blank">
+          https://docs.google.com/spreadsheets/d/1xKvGWCBtFioPwZfoS8PhAjTaRQIndXV9aFBSV38t-Ig/edit?usp=sharing
+        </a>
+      </p>
+
+      <p>Google Drive<br>
+        <a href="https://drive.google.com/drive/folders/1Y0Xxf0jdPFchMq0IeN7ALgI7PUHvEBaL?usp=drive_link" target="_blank">
+          https://drive.google.com/drive/folders/1Y0Xxf0jdPFchMq0IeN7ALgI7PUHvEBaL?usp=drive_link
+        </a>
+      </p>
+
+      <p>スクリム用BPツール<br>
+        <a href="https://draftlol.dawe.gg/" target="_blank">https://draftlol.dawe.gg/</a>
+      </p>
+
+      <p>練習用BPツール<br>
+        <a href="https://pick-ban-gg.web.app/" target="_blank">https://pick-ban-gg.web.app/</a>
+      </p>
+
+      <p>リフトキット<br>
+        <a href="https://beta.riftkit.net/?room=cc80d5" target="_blank">https://beta.riftkit.net/?room=cc80d5</a>
+      </p>
+
+      <p>Leaguepedia LJL2025<br>
+        <a href="https://lol.fandom.com/wiki/LJL/2025_Season" target="_blank">https://lol.fandom.com/wiki/LJL/2025_Season</a>
+      </p>
+
+      <p>プロBP統計<br>
+        <a href="https://gol.gg/esports/home/" target="_blank">https://gol.gg/esports/home/</a>
+      </p>
+
+      <p>Handsサイト<br>
+        <a href="https://tetras256.github.io/HNSwebsite/" target="_blank">https://tetras256.github.io/HNSwebsite/</a>
+      </p>
+    </div>
+  </div>
+
+</body>
+</html>
+

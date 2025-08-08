@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>メタ練習マニュアル</title>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+
+ body {
+  margin: 0;
+  background: #d9cbb5 url('https://www.transparenttextures.com/patterns/wood-pattern.png');
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  perspective: 2000px;
+  font-family: 'Playfair Display', serif;
+}
+
+  .book {
+    position: relative;
+    width: 480px; height: 520px;
+    transform-style: preserve-3d;
+  }
+
+  .spine {
+    position: absolute;
+    width: 70px; height: 100%;
+    left: 0; top: 0;
+    background: linear-gradient(135deg, #3d2f1c 0%, #1f150a 100%);
+    border-radius: 10px 0 0 10px;
+    box-shadow: inset 0 0 20px #5a4224, inset 0 5px 10px rgba(255,255,255,0.15);
+    z-index: 50;
+  }
+  .spine::before {
+    content: '';
+    position: absolute; left: 14px; top: 20px;
+    height: calc(100% - 40px); width: 4px;
+    background: repeating-linear-gradient(to bottom, #a3784c 0, #a3784c 3px, transparent 3px, transparent 7px);
+    border-radius: 2px;
+  }
+
+  /* 両面ページ構造 */
+  .page, .backCover {
+    position: absolute; top: 0; left: 70px;
+    width: 410px; height: 100%;
+    transform-style: preserve-3d;
+    transform-origin: left center;
+    transition: transform 0.7s cubic-bezier(0.4,0,0.2,1);
+    user-select: none;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.12);
+    border-radius: 0 14px 14px 0;
+  }
+
+  /* 表面 */
+  .page-front, .cover-front, .backCover-front {
+    position: absolute;
+    width: 100%; height: 100%;
+    background: #fffef8;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12), inset 0 0 40px #f3f0e6;
+    border-radius: 0 14px 14px 0;
+    padding: 35px 30px;
+    box-sizing: border-box;
+    color: #3a3a3a;
+    font-size: 1.15rem; line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 裏面 */
+  .page-back, .cover-back, .backCover-back {
+    position: absolute;
+    width: 100%; height: 100%;
+    background: #f9f6ef;
+    border-radius: 0 14px 14px 0;
+    box-sizing: border-box;
+    padding: 35px 30px;
+    box-shadow: inset 0 0 15px #d9d1b6;
+    color: #555;
+    font-size: 1.15rem; line-height: 1.6;
+    transform: rotateY(180deg);
+    display: flex;
+    flex-direction: column;
+    backface-visibility: hidden;
+  }
+
+
+  /* 表紙 */
+  .cover {
+    position: absolute;
+    top: 0; left: 70px;
+    width: 410px; height: 100%;
+    transform-style: preserve-3d;
+    transform-origin: left center;
+    transition: transform 0.7s cubic-bezier(0.4,0,0.2,1);
+    z-index: 60;
+    user-select: none;
+    box-shadow:
+      0 0 25px rgba(0,0,0,0.3),
+      inset 0 0 40px #7f6345;
+    border-radius: 0 18px 18px 0;
+  }
+  .cover-front {
+    background:
+      linear-gradient(135deg, #6a4e34 0%, #2f1e12 70%);
+    background-image:
+      repeating-linear-gradient(
+        45deg,
+        #6a4e34,
+        #6a4e34 2px,
+        #593e27 2px,
+        #593e27 4px
+      );
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #f3e4b7;
+    letter-spacing: 0.1em;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    padding: 40px 30px;
+    border-radius: 0 18px 18px 0;
+    box-shadow: inset 0 0 15px #3c2e17;
+  }
+  .cover-front h1 {
+    font-size: 3.2rem; font-weight: 900; margin: 0 0 12px 0;
+    text-shadow:
+      2px 2px 4px rgba(0,0,0,0.5);
+  }
+  .cover-front h2 {
+    font-weight: 400; font-style: italic; font-size: 1.3rem; margin: 0 0 24px 0;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.35);
+  }
+  .cover-front .author {
+    margin-top: auto;
+    font-style: italic;
+    font-size: 1.1rem;
+    color: #e0d5a8;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.35);
+  }
+
+  .cover-back {
+    background: #5e4b2b;
+    border-radius: 0 18px 18px 0;
+    box-shadow: inset 0 0 25px #3f3116;
+    padding: 40px 30px;
+  }
+  .cover-back > * {
+    color: #d6caa2;
+  }
+
+  /* 裏表紙 */
+  .backCover {
+    z-index: 10;
+  }
+  .backCover-front {
+    background:
+      linear-gradient(135deg, #574431 0%, #2f2718 90%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #ddd6b8;
+    font-size: 1.6rem;
+    font-weight: 600;
+    font-style: italic;
+    border-radius: 0 14px 14px 0;
+    box-shadow:
+      0 4px 15px rgba(0,0,0,0.25),
+      inset 0 0 30px #463d2c;
+    padding: 35px 30px;
+  }
+  .backCover-back {
+    background: #3f371f;
+    border-radius: 0 14px 14px 0;
+    box-shadow: inset 0 0 25px #2e2a19;
+    padding: 35px 30px;
+    color: #b4ad85;
+    font-size: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* めくりアニメーション */
+  .flipped {
+    transform: rotateY(-180deg);
+    box-shadow:
+      0 15px 30px rgba(0,0,0,0.35),
+      inset 0 0 50px #bba976;
+  }
+
+  /* ページと表紙の共通 */
+  .cover, .page, .backCover {
+    transform-style: preserve-3d;
+    transition: transform 0.7s cubic-bezier(0.4,0,0.2,1);
+    transform-origin: left center;
+  }
+</style>
+
+</head>
+<body>
+
+<div class="book" id="book">
+  <div class="spine"></div>
+
+  <div class="cover" id="cover">
+    <div class="cover-front">
+      <h1>メタ練習のやり方ガイド</h1>
+      <h2>メタ練習を成功させるコツ</h2>
+      <div class="author">著者：Palm of Fate</div>
+    </div>
+    <div class="cover-back">
+      <h1>なぜメタ練習が必要なのか</h1>
+      <p>・試合で有利なピック/構成を理解する<br>・敵の強い戦術に対応できるようになる<br>・チーム全体で共通認識を持ちやすくなる<br>・練習効率を高めるため</p>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="page-front">
+      <h3>もくじ</h3>
+      <u1>
+       <li><a href="#" onclick="goToPage(3)">ガンクMIDメタ</a></li>
+       <li><a href="#" onclick="goToPage(4)">圧力MIDメタ</a></li>
+       <li><a href="#" onclick="goToPage(5)">ガンクTOPメタ</a></li>
+       <li><a href="#" onclick="goToPage(6)">ダイブTOPメタ</a></li>
+       <li><a href="#" onclick="goToPage(7)">ロームMIDメタ</a></li>
+       <li><a href="#" onclick="goToPage(8)">攻めのBOTメタ</a></li>
+       <li><a href="#" onclick="goToPage(9)">守りのBOTメタ</a></li>
+       <li><a href="#" onclick="goToPage(10)">スライドBOTメタ</a></li>
+      </ul> 
+    </div>
+    <div class="page-back">
+      <h3>ガンクMIDメタ</h3>
+      <p>必ずJGがガンクに来るためウェーブを意図的に引きながらダメージトレードを行う<br>ガンクが来るタイミングで相手のHPを６０％程度にした状態でCCスキルを必ず保持しておくこと<br>例）①自分にAAさせる<br>→自陣ミニオンが敵のチャンピオンにターゲットするのでミニオン間で差が出る<br>②スキルをミニオンに撃たせる<br>→ミニオンの中にあえて立ち自分ごとdamageを食らう</p>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="page-front">
+      <p>※一方的にミニオンにスキルを当てるとウェーブがプッシュになってしまう→プッシュになった場合プレスに切り替える。<br>③３ウェーブ目が到着したころにJGが到着するのでJGがアクションを開始してから仕掛ける<br>この時相手のCSタイミングかdamageトレードタイミングで仕掛ける<br>必ずキルorフラッシュが落ちる<br>④HPが大きく削れた場ウェーブ状況を確認しリコールもしくはレーン戦を継続次のアクションに備えてウェーブを整える（通常攻撃合算値を考慮する）<br>⑤４，５ウェーブ目を処理しJGと同じブッシュでリコール<br></p>
+    </div>
+    <div class="page-back">
+      <h3>圧力MIDメタ</h3>
+      <p>※主導権があること<br>
+         ・相手のCSタイミングごとにハラスを受けるかCSをロストするかを選択させる<br>
+         ・上のために赤と青のミニオンが同時に死なないように調整<br>
+         ・jgがカバーできるタイミングでプッシュ<br>
+         ・jgはMIDが押し付けたビックウェーブがやけきるまでMIDのそばで待機<br>
+         ・敵のCSやヘルスをロストさせる<br>
+         ・jgがファームに戻ったらjg側に体をよせ、ワードを置く<br>
+         ・jgが駆け付けられる距離で再び圧力をかける</p>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="page-front">
+      <p>・jgが駆け付けられる距離で再び圧力をかける<br>
+         ・圧力に屈して仕掛けてきたら刈り取る<br>
+         ・1kill or コアの素材購入でリコール<br>
+         ・jgとリコールタイミングをそろえる<br>
+         ・以降即pushで1ターン分行動する</p>
+    </div>
+     <div class="page-back">
+      <h3>ガンクTOPメタ</h3>
+      <p>必ずJGがガンクに来るためウェーブを意図的に引きながらダメージトレードを行う<br>ガンクが来るタイミングで相手のHPを６０％程度にした状態でCCスキルを必ず保持しておくこと<br>例）①自分にAAさせる<br>→自陣ミニオンが敵のチャンピオンにターゲットするのでミニオン間で差が出る<br>②スキルをミニオンに撃たせる<br>→ミニオンの中にあえて立ち自分ごとdamageを食らう</p>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="page-front">
+      <p>※一方的にミニオンにスキルを当てるとウェーブがプッシュになってしまう→プッシュになった場合ダイブに切り替える。<br>③JGが到着したのを確認して仕掛ける<br>この時相手のCSタイミングかdamageトレードタイミングで仕掛ける<br>必ずキルorフラッシュが落ちる<br>④HPが大きく削れた場ウェーブ状況を確認しリコールもしくはレーン戦を継続次のアクションに備えてウェーブを整える（通常攻撃合算値を考慮する）<br>⑤ウェーブを処理しJGと同じブッシュでリコール<br></p>
+    </div>
+    <div class="page-back">
+       <h3>ダイブtopメタ <h3>
+      ・3人から練習可能<br>
+・実施する側必ずプッシュ主導権が相手より高い事<br>
+・バーストが高く、耐久性の高いルーン選択をする<br>
+・ブッシュの主導権の有無の確認<br>
+    ・ダメージトレードをメインに行う(プッシュの主導権を取るのは前提)</p>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="page-front">
+    ・ダメージトレードはどんな形になっても良く、1%でも多くHPを減らすことを意識する<br>
+    ・7~8割以下にできれば成功<br>
+    ・ヘルスセットアップ完了後JGが来るタイミングに合わせてウェーブをタワーにクラッシュさせる<br>
+    ・必ず確定CCから入ること</p>
+    </div>
+    <div class="page-back">
+      <h3>ロームMIDメタ</h3>
+      <p>・相手よりウェーブコントロール主導権が必ずある場合に行う<br>・相手がミニオンに触りづらいように動く<br>・最初にウェーブが到達する前の立ち位置で主導権が確定する<br>・2wave目でタワー前付近に保持する<br>・味方JGが到着する直前にできる限り大きなウェーブを押し付け終わるようにする<br>※味方JGのファームスピードによってどのウェーブでどのタイミングに押すのかを調整する</p>
+    </div>
+  </div>
+  
+  <div class="page">
+    <div class="page-front">
+      <p>・視界を考え下側に移動フェイクを入れてからTOPにJGと２人で同時に向かいガンクする(この時TOPはプルにコントロール)<br>※重要なので必ずサモナースペルをケチらず取り切る<br>・味方のヘルスやミニオンを見てSWAPをするか決める</p>
+    </div>
+    <div class="page-back">
+      <h3>攻めのBOTメタ</h3>
+      <p>最速で2ndブッシュに向かう→相手がいた場合、ワードを壊されない様に圧力をかけつつハラスする<br>※あまりに早い時間にハラスをしても相手はリコールしてしまうので意味がない<br>敵にAAするときはブッシュから出てAAし、そのあとブッシュに戻りブッシュでミニオンアグロをきる<br>①AAが弱い方がワードを設置<br>②ワードを置かなかった方がレンズに切り替え<br>③3rdブッシュまでスキルで確認しながら確保</p>
+    </div>
+  </div>
+  
+  <div class="page">
+    <div class="page-front">
+      <p>※相手のミニオンが流れてくる前にブッシュをとる<br>④ブッシュでのスキル避けは確率論<br>⑤ワードを置かれたら引きながら「圧力をかける人」「ワードを破壊する人」に分担<br>⑥ブッシュを取り返す<br>⑦敵のミニオンが解けるタイミングで圧力またはダメージトレードを仕掛ける(経験値取得とヘルスを天秤にかけさせる)<br>⑧繰り返す</p>
+    </div>
+    <div class="page-back">
+      <h3>守りのBOTメタ</h3>
+      <p>守りのBOTメタ<br>
+        HP管理を最優先する<br>
+        味方ジャングラーがガンクに来る前に、HPは6割以上をキープすることが基本。<br>
+        HPと経験値（CS）は状況に応じて優先度を判断し、無理に取ろうとしてHPを削らない。<br>
+
+        HPを高く保つテクニック<br>
+
+        CSを取るふりをして相手のスキルを振らせる。</p>
+    </div>
+  </div>
+  
+  <div class="page">
+    <div class="page-front">
+       <p> 敵に早めにプッシュさせ、タワー下で安全にファームする。<br>
+
+        ジャングラーとの連携<br>
+
+        ジャングラーが来るときは、自分のCCスキルを温存しておく。<br>
+
+        
+        ジャングラーの姿が見えた瞬間には、すでに仕掛け始めているのが理想。</p>
+    </div>
+    <div class="page-back">
+            <h3>スライドBOTメタ</h3>
+      <p>・8人から練習可能。<br>
+         ・必ず攻め側はJG内等の少数戦が相手<br>　よりも強い事。<br>
+         ・攻め守り問わずBOTメタを行います。<br>
+         ・重要なのはリコールタイミングがズレる　ことです。<br>
+         ・各メタと同じように味方JGに暇な時間<br>　を作らない様にウェーブをコントロール<br>　してください。<br>
+         ・相手のADCのみを倒してプッシュして<br>　リコールします。サポートはダイブ等で<br>　deadしても問題ありません。<br></p>
+    </div>
+  </div>
+
+   <div class="page">
+    <div class="page-front">
+      <p>
+         ・相手ADCが復活後に戻ってきた際、<br>　サポートはロームはせずレーンの<br>　タワープレートを守ってください。<br>
+         ・そうすることにより相手視点ではJGの<br>　プレッシャーでタワープレートを<br>　狙ったりハラスを行うことが<br>　できません。<br>
+         ・相手は経験値を吸う必要があった<br>　サポートも帰っていない為、<br>　リコールが最善択になります。<br>
+         ・ここで相手とリコールがずれます。<br>
+         ・タワー下でミニオンを処理した後、<br>　次のウェーブを即プッシュします。<br>　(タワー下に確実にミニオンが入るように急ぐ)<br>
+         </p>
+    </div>
+    <div class="page-back">
+            <p>
+         ・その後JG含めて3人でラインを合わせて<br>　ロームします。敵を見つけたら即仕掛けます。<br>
+         ・最初はBOT付近でのロームを行います。<br>(相手BOTJGや敵のBOTタワー裏等)<br>
+         ・タワー裏で相手を止められた場合、<br>　PULLウェーブなので時間をかけても<br>　構いません。<br>(敵にTPを使用させる等)<br>
+         ・無暗に戦わず、相手がウェーブを押そう<br>　としたらJGがいればガンク、<br>　2v2で倒すのも可。<br></p>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="page-front">
+            <p>
+         ・その後はサポートのみでローム距離<br>　を拡大。姿を見せたら相手はすぐに<br>　プッシュしてくるのでそれを想定して<br>　ローム時間を決めてください。 <br>
+         ・利益を確実に出せる場合はどれだけ<br>　ロームに時間をかけても構いません。<br>
+         ・相手サポートがBOTにいることが<br>　確認してこそのガンクになります。</p>
+    </div>
+  <div class="page-back">
+       <h3>TOPロームメタ</h3>
+      <p>・4人から練習可能<br>
+         ・相手よりウェーブコントロール主導権のある<br> チャンピオンで可能(ボリベアが最適)<br> ※ウェーブコントロール主導権以外に、<br> JGファイトをするためCCやブリンクがあると<br> やりやすい。<br>
+         ・攻め側JGは同方向スタートの場合のみ<br> ・3wave目で押しきる<br> ・むやみに押すのではなく通常攻撃合算値を計算し、<br> より多くのミニオンをためる。<br> 
+      </p>
+  </div>
+  </div>
+
+
+    <div class="page">
+    <div class="page-front">
+           <p>(多くためるほど自由に動ける時間が増える。) <br>
+        ・相手がミニオンに触れようとしたら必ず邪魔をする。<br> ・3wave目が来たら最速でプッシュする。<br> できなければ味方JGとタイミングが合わなくなってしまう。<br> ・JGと同じタイミングと位置関係で<br> 敵のJGに歩き始める。<br>
+        (敵がいたらすぐに仕掛けられるよう<br> ぴったり息を合わせて行動する。)<br> ・敵を見つけて追い切れると判断したら<br> 即時2人でサモナースペルを使用し倒しきる。<br> 
+      </p>
+    </div>
+    <div class="page-back">
+       <p>(重要なシーンであるためケチらない)<br> 
+      ・青バフを手伝う<br> (敵JGに味方JGが襲われないため)<br> ※レーン状況、2人のHP等状況に応じて<br> どのキャンプを抜くのか、どの程度手伝うのかを判断<br> ・レーンの状況、自身のHPを考えてTPを使用するか判断<br> 
+      ・以降TOPメタに切り替える<br> (JGの主導権が確定したため)<br> ・ガンク、ダイブ共に可能。<br> ・味方JGが近くにいる場合TOPレーナーは戦い続ける。<br>
+    </p>
+    </div>  
+</div>
+
+  <!-- 裏表紙 -->
+  <div class="backCover" id="backCover">
+    <div class="backCover-front">
+      <p></p>
+    </div>
+    <div class="backCover-back">
+      <p>読んでいただきありがとうございます。</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const book = document.getElementById('book');
+const cover = document.getElementById('cover');
+const backCover = document.getElementById('backCover');
+const pages = [...document.querySelectorAll('.page')];
+let current = 0;
+
+// 初期の z-index 設定
+cover.style.zIndex = pages.length + 3;
+pages.forEach((p, i) => {
+  // 裏表紙より手前に
+  p.style.zIndex = pages.length - i + 2;
+});
+backCover.style.zIndex = 1; // 一番奥
+
+function flip(element, z) {
+  element.classList.add('flipped');
+  element.style.zIndex = z;
+}
+
+function unflip(element, z) {
+  element.classList.remove('flipped');
+  // 一度 z-index を低くして裏面を見えなくする
+  setTimeout(() => {
+    element.style.zIndex = z;
+  }, 400); // アニメーション時間（0.7秒）より少し短めに
+}
+function flipNext() {
+  if (current === 0) {
+    flip(cover, 100);
+    current++;
+  } else if (current <= pages.length) {
+    flip(pages[current - 1], 100 + current);
+    current++;
+  } else if (current === pages.length + 1) {
+    flip(backCover, 100 + current);
+    current++;
+  }
+}
+
+function flipPrev() {
+  if (current > pages.length + 1) {
+    current--;
+    unflip(backCover, 1);
+  } else if (current > 1) {
+    current--;
+    unflip(pages[current - 1], pages.length - current + 2);
+  } else if (current === 1) {
+    unflip(cover, pages.length + 3);
+    current--;
+  }
+}
+
+book.addEventListener('click', (e) => {
+  const rect = book.getBoundingClientRect();
+  const clickX = e.clientX - rect.left;
+  const bookWidth = rect.width;
+
+  if (clickX > bookWidth / 2) {
+    if (current <= pages.length + 1) flipNext();
+  } else {
+    if (current >= 1) flipPrev();
+  }
+});
+
+function goToPage(index) {
+  // 現在位置からジャンプ先までめくる or 戻す
+  while (current < index) {
+    flipNext();
+  }
+  while (current > index) {
+    flipPrev();
+  }
+}
+
+</script>
+
+</body>
+</html>
